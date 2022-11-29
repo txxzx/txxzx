@@ -2,11 +2,10 @@ package main
 
 import (
 	"fmt"
-	"gitea.com/xorm/xorm"
+	"xorm.io/xorm"
+
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/henrylee2cn/goutil/coarsetime"
-
-	//"github.com/henrylee2cn/goutil/coarsetime"
-
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -83,7 +82,7 @@ func parse2(body string) {
 	title := re_title.FindString(content)
 	fmt.Printf("title: %v\n", title)
 	// 切片
-	title = title[42 : len(title)-1]
+	title = title[42 : len(title)-5]
 	fmt.Printf("title: %v\n", title)
 	// 保存到本地
 	//Save(title,content)
@@ -111,7 +110,7 @@ var engine *xorm.Engine
 var err error
 
 func Init() {
-	engine, err := xorm.NewEngine("mysql", "root:root@test?charset=utf8")
+	engine, err := xorm.NewEngine("mysql", "root:root@/test?charset=utf8")
 	if err != nil {
 		fmt.Printf("err-> %v", err)
 	} else {
@@ -124,7 +123,7 @@ func Init() {
 	}
 }
 
-type GoPages struct {
+type Test struct {
 	Id      int64
 	Title   string
 	Content string `xorm:"text"`
@@ -134,8 +133,8 @@ type GoPages struct {
 
 // 保存到数据库
 func SaveToDB(title, content string) {
-	engine.Sync(new(GoPages))
-	page := GoPages{
+	engine.Sync(new(Test))
+	page := Test{
 		Title:   title,
 		Content: content,
 		Created: coarsetime.FloorTimeNow().Unix(),
