@@ -1,0 +1,79 @@
+package main
+
+import (
+	"fmt"
+	"github.com/axgle/mahonia"
+
+	"io"
+	"io/ioutil"
+	"net/http"
+)
+
+/**
+    @date: 2022/11/29
+**/
+
+func main() {
+	url := "https://img2.baidu.com/it/u=1543120032,2597615143&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=1082"
+	result := Fech(url)
+	result = ConvertToString(result, "gbk", "utf-8")
+	fmt.Println(result)
+}
+
+// 爬取整个页面将整个页面信息保存result
+func httpGet(url string) (result string, err error) {
+	resp, err := http.Get(url)
+	if err != nil {
+		fmt.Printf("http get err-> %v\n", err)
+		return "", err
+	}
+	defer resp.Body.Close()
+	buf := make([]byte, 4096)
+	for {
+		n, err := resp.Body.Read(buf)
+		if n == 0 {
+			break
+		}
+		if err != nil && err != io.EOF {
+			fmt.Printf("resp body err -> %v\n", err)
+			return "", err
+		}
+		result += string(buf[:n])
+	}
+	return result, nil
+}
+
+func Fech(url string) string {
+	client := &http.Client{}
+	req, _ := http.NewRequest("GET", url, nil)
+	// 设置请求header和cookie
+	// 解决防爬虫 1.用户代理  2.
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36")
+	req.Header.Set("Cookie", "BDqhfp=图片女&&-10-1undefined&&0&&1; winWH=^6_1536x666; BDIMGISLOGIN=0; BIDUPSID=1AC1809B4D5DE21FCE160AC3C07348B8; PSTM=1658062755; BAIDUID=1AC1809B4D5DE21F5F79B895FDB8A24A:FG=1; H_WISE_SIDS=107314_110085_114552_179345_188749_194519_196428_199579_204314_204911_206125_208607_208721_209568_209630_210090_210303_210323_212295_212739_213045_213353_214109_214129_214137_214143_214798_215730_216848_216883_216943_217167_217707_218234_218359_218445_218455_218548_218599_218855_219245_219452_219509_219578_219667_219715_219716_219862_219942_219946_220071_220344_220384_220609_220662_220927_221007_221016_221088_221108_221116_221118_221121_221187_221372_221417_221501_221608_221641_221680_221698_221797_221825_221874_221893_221922_222128_222137_222259_222391_222397_222522_222615_222618_222619_222625_222727_222878_223048_223131_8000091_8000128_8000142_8000150_8000156_8000163_8000165_8000174_8000177_8000176_8000184_8000185; H_WISE_SIDS_BFESS=107314_110085_114552_179345_188749_194519_196428_199579_204314_204911_206125_208607_208721_209568_209630_210090_210303_210323_212295_212739_213045_213353_214109_214129_214137_214143_214798_215730_216848_216883_216943_217167_217707_218234_218359_218445_218455_218548_218599_218855_219245_219452_219509_219578_219667_219715_219716_219862_219942_219946_220071_220344_220384_220609_220662_220927_221007_221016_221088_221108_221116_221118_221121_221187_221372_221417_221501_221608_221641_221680_221698_221797_221825_221874_221893_221922_222128_222137_222259_222391_222397_222522_222615_222618_222619_222625_222727_222878_223048_223131_8000091_8000128_8000142_8000150_8000156_8000163_8000165_8000174_8000177_8000176_8000184_8000185; BDSFRCVID=N8KOJeCmHRhWneojA9tOrgH9YmKK0gOTHllnoMiRAPOFYGCVJeC6EG0Ptf8g0KubuTkzogKK0gOTH6KF_2uxOjjg8UtVJeC6EG0Ptf8g0M5; H_BDCLCKID_SF=tbCeoK0-tDt3qn7I5KIhDjo-qxbXqMCOW2OZ0lOEWUosSnrNhP6NeJ0gKxJ7qlcLW20j0h7mWnRSDR7EMq5N0M4zWtJmLfT-0bc4KKJxbnLWeIJo5t5h3-PhhUJiB5OMBan7_qvIXKohJh7FM4tW3J0ZyxomtfQxtNRJ0DnjtpChbRO4-TF-DjvQefK; BDORZ=B490B5EBF6F3CD402E515D22BCDA1598; H_PS_PSSID=37857_36551_37732_37840_34813_37766_37820_36804_37761_37759_26350_22157; BAIDUID_BFESS=1AC1809B4D5DE21F5F79B895FDB8A24A:FG=1; BDSFRCVID_BFESS=N8KOJeCmHRhWneojA9tOrgH9YmKK0gOTHllnoMiRAPOFYGCVJeC6EG0Ptf8g0KubuTkzogKK0gOTH6KF_2uxOjjg8UtVJeC6EG0Ptf8g0M5; H_BDCLCKID_SF_BFESS=tbCeoK0-tDt3qn7I5KIhDjo-qxbXqMCOW2OZ0lOEWUosSnrNhP6NeJ0gKxJ7qlcLW20j0h7mWnRSDR7EMq5N0M4zWtJmLfT-0bc4KKJxbnLWeIJo5t5h3-PhhUJiB5OMBan7_qvIXKohJh7FM4tW3J0ZyxomtfQxtNRJ0DnjtpChbRO4-TF-DjvQefK; PSINO=6; delPer=0; BA_HECTOR=2ha020202ga0a08g05250fgh1hoc47l1h; ZFY=E:AzLfKf47bPQcW0cDNNIZlBGYGvg:AdN288Md3j7awUk:C; BDRCVFR[dG2JNJb_ajR]=mk3SLVN4HKm; BDRCVFR[-pGxjrCMryR]=mk3SLVN4HKm; indexPageSugList=[\"图片女\",\"image: unknown format\"]; cleanHistoryStatus=0; BDRCVFR[tox4WRQ4-Km]=mk3SLVN4HKm; ab_sr=1.0.1_MWFhNjA4NzQ3OGQwZWM2NTBhMWIzMGI2OTJmMjhhYzJiZGFiYjU5ZTNkZTg2YjVjNTM1OGRlZDRhZTM1ZmRmNDE2OGI1OGYxNDE1ZjEyNGViZjY1NTI1MTQyM2UzMmIzMjI3NTFlOWIzOWEwOTYwNDJiZDg5NjRjYzYwOTIxYzI3YzA4ZjUyNzY0NTZhNDJkNTAzNzY5OGYyMzBlMTJlZQ==")
+	// 发送请求
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println("http get req err", err)
+		return ""
+	}
+	if resp.StatusCode != 200 {
+		fmt.Println("Http status code", resp.StatusCode)
+		return ""
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("Read err", err)
+		return ""
+	}
+	return string(body)
+}
+
+func ConvertToString(src string, srcCode string, tagCode string) string {
+	srcCoder := mahonia.NewDecoder(srcCode)
+	srcResult := srcCoder.ConvertString(src)
+	tagCoder := mahonia.NewDecoder(tagCode)
+	_, cdata, _ := tagCoder.Translate([]byte(srcResult), true)
+	result := string(cdata)
+	return result
+}
